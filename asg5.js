@@ -17,6 +17,7 @@ let scene;
 function main() {
     const canvas = document.querySelector('#c');
     const renderer = new THREE.WebGLRenderer({canvas});
+    const loader = new THREE.TextureLoader();
 
     const fov = 75;
     const aspect = 2;  // the canvas default
@@ -30,6 +31,16 @@ function main() {
     controls.update();
 
     scene = new THREE.Scene();
+
+    // Add a skybox
+    const texture = loader.load(
+        'resources/images/tears_of_steel_bridge_2k.jpg',
+        () => {
+          const rt = new THREE.WebGLCubeRenderTarget(texture.image.height);
+          rt.fromEquirectangularTexture(renderer, texture);
+          scene.background = rt.texture;
+    });
+
     {
         // const color = 0xFFFFFF;
         // const intensity = 1;
@@ -46,7 +57,7 @@ function main() {
     let maze = new Maze(5, 5, [0,0], 40, 40);
     maze.addToScene(scene);
 
-    const loader = new THREE.TextureLoader();
+    
 
     {
         const objLoader = new OBJLoader();
