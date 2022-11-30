@@ -57,7 +57,12 @@ function main() {
     let maze = new Maze(5, 5, [0,0], 40, 40);
     maze.addToScene(scene);
 
-    
+    console.log(maze.getGridToLocal(1, 1));
+
+    {
+        var ambient = new THREE.AmbientLight(0xffffff);
+        scene.add(ambient);
+    }
 
     {
         const objLoader = new OBJLoader();
@@ -70,6 +75,25 @@ function main() {
             });
         });
     }
+
+    {
+        const objLoader = new OBJLoader();
+        const mtlLoader = new MTLLoader();
+        mtlLoader.load('./resources/models/tubbs.mtl', (mtl) => {
+            mtl.preload();
+            objLoader.setMaterials(mtl);
+            let object = objLoader.load('./resources/models/tubbs.obj', (root) => {
+                root.scale.multiplyScalar(2);
+                let p = maze.getGridToLocal(1,1);
+                console.log(root.position);
+                root.position.x = p.x;
+                root.position.y = 1;
+                root.position.z = p.y;
+                scene.add(root);
+            });
+        });
+    }
+    
 
 
     {
