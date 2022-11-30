@@ -3,6 +3,7 @@ import { Scene, TorusGeometry } from "three";
 
 import { BaseModel } from './baseModel.js';
 
+const loader = new THREE.TextureLoader();
 
 export class TorusStack extends BaseModel{
     constructor(x, z,ringRadius=0.5, tubeRadius=0.25, ringSegs=6, tubeSegs=6, numRings=5){
@@ -29,10 +30,12 @@ export class TorusStack extends BaseModel{
 
 
 export class Wall extends BaseModel{
-    constructor(w, h, d){
+    constructor(w, h, d, material={color:0x4488aa}){
         super();
         let wall_geo = new THREE.BoxGeometry(w, h, d);
-        let wall_mat = new THREE.MeshPhongMaterial({color:0x4488aa});
+        console.log(material)
+        let wall_mat = new THREE.MeshPhongMaterial(material);
+        
         this.objects.push(new THREE.Mesh(wall_geo, wall_mat));
     }
 
@@ -91,24 +94,32 @@ export class BridgeUnit extends BaseModel{
         //     this.objects.at(-1).position.z = -this.w/2;
         // }
         
-        console.log(this.w, this.l)
+        //console.log(this.w, this.l)
 
         this.objects.push(new Wall(this.w, 1, this.l).setPosition(this.x, 0, this.z));
         if (this.wallPos){ // top left bot right
-            console.log(this.wallPos);
+            //console.log(this.wallPos);
             let SPACING = this.w/2 -0.25;
+
+            let texture = loader.load('./resources/images/fish.png')
+
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.magFilter = THREE.NearestFilter;
+            const repeats = 2;
+            texture.repeat.set(repeats, 1);
             // 4 sides
             if (this.wallPos[0] == -1)
-                this.objects.push(new Wall(this.w, 1, 0.5).setPosition(this.x, 1, this.z-SPACING));
+                this.objects.push(new Wall(this.w, 1, 0.5, {map: texture}).setPosition(this.x, 1, this.z-SPACING));
 
             if (this.wallPos[1] == -1)
-                this.objects.push(new Wall(0.5, 1, this.l).setPosition(this.x-SPACING, 1, this.z));
+                this.objects.push(new Wall(0.5, 1, this.l, {map: texture}).setPosition(this.x-SPACING, 1, this.z));
         
             if (this.wallPos[2] == -1)
-                this.objects.push(new Wall(this.w, 1, 0.5).setPosition(this.x, 1, this.z+SPACING));
+                this.objects.push(new Wall(this.w, 1, 0.5, {map: texture}).setPosition(this.x, 1, this.z+SPACING));
         
             if (this.wallPos[3] == -1)
-                this.objects.push(new Wall(0.5, 1, this.l).setPosition(this.x+SPACING, 1, this.z));
+                this.objects.push(new Wall(0.5, 1, this.l, {map: texture}).setPosition(this.x+SPACING, 1, this.z));
 
             // 4 corners
             if (this.wallPos[0] == this.wallPos[1])

@@ -150,7 +150,7 @@ export class Maze {
             let tWidth = this.totalWidth/this.gw;
             let tHeight = this.totalHeight/this.gh;
 
-            console.log(tWidth)
+            //console.log(tWidth)
 
             this.objects.push(new BridgeUnit(localCoord.x, localCoord.y, this.adjacency[i], tWidth, tHeight));
 
