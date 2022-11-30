@@ -18,12 +18,11 @@ let scene;
 function main() {
     const canvas = document.querySelector('#c');
     const renderer = new THREE.WebGLRenderer({canvas});
+    renderer.shadowMap.enabled = true;
     const loader = new THREE.TextureLoader();
 
 
-    canvas.addEventListener('keydown', (e) => {
-        draw(`keyCode: ${e.keyCode}`);
-    });
+
     
     //const cameraMode;
 //    moveUp
@@ -110,11 +109,12 @@ function main() {
         texture.repeat.set(repeats, repeats);
 
         const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
-        const planeMat = new THREE.MeshPhongMaterial({
+        const planeMat = new THREE.MeshBasicMaterial({
         map: texture,
         side: THREE.DoubleSide,
         });
         const mesh = new THREE.Mesh(planeGeo, planeMat);
+        mesh.receiveShadow = true;
         mesh.rotation.x = Math.PI * -.5;
         scene.add(mesh);
     }
@@ -163,10 +163,11 @@ function main() {
         }
       }
 
-      { // spot light
+      let spotlight;
+       // spot light
         const color = 0xFF0000;
         const intensity = 1;
-        const spotlight = new THREE.SpotLight(color, intensity);
+        spotlight = new THREE.SpotLight(color, intensity);
         spotlight.angle = Math.PI/8;
         spotlight.penumbra = 0;
 
@@ -176,7 +177,26 @@ function main() {
         spotlight.target.position.set(p.x, 0, p.y);
         scene.add(spotlight);
         scene.add(spotlight.target);
-      }
+
+      
+
+      canvas.addEventListener('keydown', (e) => {
+        console.log("HELLO");
+        if (e.keyCode == 65){
+            spotlight.position.x -= 1;
+            spotlight.target.position.x -= 1;
+        } else if (e.keyCode == 68){
+            spotlight.position.x += 1;
+            spotlight.target.position.x += 1;
+        } else if (e.keyCode == 87) {
+            spotlight.position.z -= 1;
+            spotlight.target.position.z -= 1;
+        } else if (e.keyCode == 83){
+            spotlight.position.z += 1;
+            spotlight.target.position.z += 1;
+        }
+    });
+
       const gui = new GUI();
       { // Hemisphere Light
         const skyColor = 0xB1E1FF;  // light blue
@@ -193,10 +213,16 @@ function main() {
 
     { // Directional Light
         const color = 0xFFFFFF;
-        const intensity = 0;
+        const intensity = 0.5;
         const light = new THREE.DirectionalLight(color, intensity);
-        light.position.set(0, 10, 0);
+        light.position.set(0, 20, 0);
         light.target.position.set(-5, 0, 0);
+        light.shadow.camera.left = -15;
+        light.shadow.camera.bottom = -15;
+        light.shadow.camera.right = 15;
+        light.shadow.camera.top = 15;
+        
+        light.castShadow = true;
         scene.add(light);
         scene.add(light.target);
 
@@ -205,9 +231,9 @@ function main() {
 
         function makeXYZGUI(gui, vector3, name, onChangeFn) {
             const folder = gui.addFolder(name);
-            folder.add(vector3, 'x', -10, 10).onChange(onChangeFn);
-            folder.add(vector3, 'y', 0, 10).onChange(onChangeFn);
-            folder.add(vector3, 'z', -10, 10).onChange(onChangeFn);
+            folder.add(vector3, 'x', -20, 20).onChange(onChangeFn);
+            folder.add(vector3, 'y', 0, 20).onChange(onChangeFn);
+            folder.add(vector3, 'z', -20, 20).onChange(onChangeFn);
             folder.open();
         }
 
@@ -219,7 +245,7 @@ function main() {
 
 
         gui.addColor(new ColorGUIHelper(light, 'color'), 'value').name('color');
-        gui.add(light, 'intensity', 0, 0.5, 0.01);
+        gui.add(light, 'intensity', 0, 1, 0.01);
 
         makeXYZGUI(gui, light.position, 'position', updateLight);
         makeXYZGUI(gui, light.target.position, 'target', updateLight);

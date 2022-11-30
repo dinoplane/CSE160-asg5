@@ -6,16 +6,18 @@ import { BaseModel } from './baseModel.js';
 const loader = new THREE.TextureLoader();
 
 export class TorusStack extends BaseModel{
-    constructor(x, z,ringRadius=0.5, tubeRadius=0.25, ringSegs=6, tubeSegs=6, numRings=7){
+    constructor(x, z,ringRadius=0.5, tubeRadius=0.25, ringSegs=8, tubeSegs=8, numRings=7){
         super();
         let stack_geo = new THREE.TorusGeometry(ringRadius, tubeRadius, ringSegs, tubeSegs).rotateX(Math.PI/2);
-        let stack_mat = new THREE.MeshPhongMaterial({color:0x8844aa});
+        let stack_mat = new THREE.MeshPhongMaterial({map: loader.load('./resources/images/sky.png')});
 
         // stack of toruses
         for (let i = 0; i < numRings; i++){
             this.objects.push(new THREE.Mesh(stack_geo, stack_mat));
             this.objects.at(-1).position.y = i*0.5;
             this.setPosition(x, z);
+            // this.objects.at(-1).receiveShadow = true;
+            // this.objects.at(-1).castShadow = true;
 
 
         }
@@ -41,9 +43,10 @@ export class HoveringLight extends BaseModel{
         super();
         let light_geo = new THREE.OctahedronGeometry(radius);
         let light_mat = new THREE.MeshPhongMaterial(material);
+        
 
         this.objects.push(new THREE.Mesh(light_geo, light_mat));
-
+        this.objects.at(-1).castShadow = true;
         let color = 0xAAAAAA;
         let intensity = 0.7;
 
@@ -61,7 +64,6 @@ export class HoveringLight extends BaseModel{
     render(time){
         this.objects[0].position.y = this.y+Math.sin(time+this.objects[0].position.x);
         
-        console.log(Math.sin(time));
     }
 }
 
@@ -74,6 +76,8 @@ export class Wall extends BaseModel{
         let wall_mat = new THREE.MeshPhongMaterial(material);
         
         this.objects.push(new THREE.Mesh(wall_geo, wall_mat));
+        //this.objects.at(-1).castShadow = true;
+        this.objects.at(-1).receiveShadow = true;
     }
 
     setPosition(x, y, z){
@@ -134,6 +138,8 @@ export class BridgeUnit extends BaseModel{
         //console.log(this.w, this.l)
 
         this.objects.push(new Wall(this.w, 1, this.l).setPosition(this.x, 0, this.z));
+        
+        this.objects.at(-1).receiveShadow = true;
         if (this.wallPos){ // top left bot right
             //console.log(this.wallPos);
             let SPACING = this.w/2 -0.25;
