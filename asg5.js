@@ -26,7 +26,7 @@ function main() {
 
 
     let fpPos;
-    let tpPos = new Vector3(0, 10, 0);
+    let tpPos = new Vector3(0, 30, 0);
     let cat;
     
     let isThirdPerson = true;
@@ -99,7 +99,7 @@ function main() {
     const fPcontrols = new FirstPersonControls(fPcamera, canvas);
     fPcontrols.lookSpeed = 0.4;
     fPcontrols.movementSpeed = 5;
-    fPcamera.enabled = false;
+    fPcontrols.enabled = false;
     
 
     

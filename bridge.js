@@ -3,6 +3,8 @@ import { Mesh, Scene, TorusGeometry } from "three";
 
 import { BaseModel } from './baseModel.js';
 
+import {VertexShader, FragmentShader} from './resources/shaders/HoverLight.js';
+
 const loader = new THREE.TextureLoader();
 
 export class TorusStack extends BaseModel{
@@ -41,10 +43,22 @@ export class HoveringLight extends BaseModel{
     constructor(x, y, z, radius=0.5, material={color:0xFFFFF6}){
         super();
         let light_geo = new THREE.OctahedronGeometry(radius);
-        let light_mat = new THREE.MeshPhongMaterial(material);
+        this.light_mat = new THREE.ShaderMaterial({
+
+            uniforms: {
+                colorB: {type: 'vec3', value: new THREE.Color(0xFF0000)},
+        colorA: {type: 'vec3', value: new THREE.Color(0x000000)},
+                uTime: {type: 'f', value : 1.0}
+            },
+        
+            vertexShader: VertexShader,
+        
+            fragmentShader: FragmentShader
+        
+        });
         
 
-        this.objects.push(new THREE.Mesh(light_geo, light_mat));
+        this.objects.push(new THREE.Mesh(light_geo, this.light_mat));
         this.objects.at(-1).castShadow = true;
         let color = 0xAAAAAA;
         let intensity = 0.7;
@@ -62,13 +76,13 @@ export class HoveringLight extends BaseModel{
 
     render(time){
         this.objects[0].position.y = this.y+Math.sin(time+this.objects[0].position.x);
-        
+        this.light_mat.uniforms['uTime'].value = time+this.objects[0].position.z;
     }
 }
 
 
 export class Wall extends BaseModel{
-    constructor(w, h, d, material={color:0x4488aa}){
+    constructor(w, h, d, material={color:0xe3e0cd}){
         super();
         let wall_geo = new THREE.BoxGeometry(w, h, d);
         //console.log(material)
