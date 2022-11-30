@@ -5,12 +5,14 @@ Fish Bones by Kenney (https://poly.pizza/m/NZg3APPfF8)
 */
 
 import * as THREE from 'three';
+import { BridgeUnit } from './bridge.js';
+import { Maze } from './maze.js';
 
 import {OBJLoader} from './node_modules/three/examples/jsm/loaders/OBJLoader.js';
 import {MTLLoader} from './node_modules/three/examples/jsm/loaders/MTLLoader.js';
 import {OrbitControls} from './node_modules/three/examples/jsm/controls/OrbitControls.js';
 import {GUI} from './node_modules/lil-gui/dist/lil-gui.esm.min.js';
-
+let scene;
 
 function main() {
     const canvas = document.querySelector('#c');
@@ -21,13 +23,13 @@ function main() {
     const near = 0.1;
     const far = 1000;
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    camera.position.set(0, 1, 2);
+    camera.position.set(0, 30, 0);
     
     const controls = new OrbitControls(camera, canvas);
-    controls.target.set(0, 1, 0);
+    controls.target.set(0, 0, 0);
     controls.update();
 
-    const scene = new THREE.Scene();
+    scene = new THREE.Scene();
     {
         // const color = 0xFFFFFF;
         // const intensity = 1;
@@ -40,7 +42,9 @@ function main() {
     const boxDepth = 1;
     const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
 
-
+    // maze...
+    let maze = new Maze(5, 5, [0,0], 40, 40);
+    maze.addToScene(scene);
 
     const loader = new THREE.TextureLoader();
 
@@ -55,6 +59,7 @@ function main() {
             });
         });
     }
+
 
     {
         const planeSize = 40;
@@ -80,6 +85,8 @@ function main() {
         makeInstance(geometry, 0x8844aa, -2),
         makeInstance(geometry, 0xaa8844,  2),
     ];
+
+
 
     function makeInstance(geometry, color, x) {
         const material = new THREE.MeshPhongMaterial({
