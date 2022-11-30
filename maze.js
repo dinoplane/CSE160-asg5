@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { BridgeUnit } from './bridge.js';
+import { BaseModel } from './baseModel.js';
 
 export class Maze {
     constructor(width=7, height=7, ctr_, tot_w, tot_h){
@@ -211,11 +212,12 @@ export class Maze {
     //     }
     // }
 
-    // render(){
-    //     for (let c of this.cubes){
-    //         c.render();
-    //     }
-    // }
+    render(time){
+        for (let obj of this.objects){
+            if (obj instanceof BaseModel)
+                obj.render(time);
+        }
+    }
 
     addToScene(scene){
         for (let i = 0; i < this.objects.length; i++){

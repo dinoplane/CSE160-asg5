@@ -14,10 +14,19 @@ import {OrbitControls} from './node_modules/three/examples/jsm/controls/OrbitCon
 import {GUI} from './node_modules/lil-gui/dist/lil-gui.esm.min.js';
 let scene;
 
+
 function main() {
     const canvas = document.querySelector('#c');
     const renderer = new THREE.WebGLRenderer({canvas});
     const loader = new THREE.TextureLoader();
+
+
+    canvas.addEventListener('keydown', (e) => {
+        draw(`keyCode: ${e.keyCode}`);
+    });
+    
+    //const cameraMode;
+//    moveUp
 
     const fov = 75;
     const aspect = 2;  // the canvas default
@@ -55,7 +64,7 @@ function main() {
     const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
 
     // maze...
-    let maze = new Maze(5, 5, [0,0], 40, 40);
+    let maze = new Maze(7, 7, [0,0], 40, 40);
     maze.addToScene(scene);
 
     console.log(maze.getGridToLocal(1, 1));
@@ -168,7 +177,7 @@ function main() {
         scene.add(spotlight);
         scene.add(spotlight.target);
       }
-    
+      const gui = new GUI();
       { // Hemisphere Light
         const skyColor = 0xB1E1FF;  // light blue
         const groundColor = 0xB97A20;  // brownish orange
@@ -176,10 +185,9 @@ function main() {
         const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
         scene.add(light);
     
-        const gui = new GUI();
         gui.addColor(new ColorGUIHelper(light, 'color'), 'value').name('skyColor');
         gui.addColor(new ColorGUIHelper(light, 'groundColor'), 'value').name('groundColor');
-        gui.add(light, 'intensity', 0, 2, 0.01);
+        gui.add(light, 'intensity', 0, 1, 0.01);
       }
 
 
@@ -209,9 +217,9 @@ function main() {
         }
         updateLight();
 
-        const gui = new GUI();
+
         gui.addColor(new ColorGUIHelper(light, 'color'), 'value').name('color');
-        gui.add(light, 'intensity', 0, 2, 0.01);
+        gui.add(light, 'intensity', 0, 0.5, 0.01);
 
         makeXYZGUI(gui, light.position, 'position', updateLight);
         makeXYZGUI(gui, light.target.position, 'target', updateLight);
@@ -230,7 +238,7 @@ function main() {
             cube.rotation.x = rot;
             cube.rotation.y = rot;
         });
-       
+        maze.render(time);
         renderer.render(scene, camera);
        
         requestAnimationFrame(render);

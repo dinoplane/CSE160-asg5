@@ -1,12 +1,12 @@
 import * as THREE from 'three';
-import { Scene, TorusGeometry } from "three";
+import { Mesh, Scene, TorusGeometry } from "three";
 
 import { BaseModel } from './baseModel.js';
 
 const loader = new THREE.TextureLoader();
 
 export class TorusStack extends BaseModel{
-    constructor(x, z,ringRadius=0.5, tubeRadius=0.25, ringSegs=6, tubeSegs=6, numRings=5){
+    constructor(x, z,ringRadius=0.5, tubeRadius=0.25, ringSegs=6, tubeSegs=6, numRings=7){
         super();
         let stack_geo = new THREE.TorusGeometry(ringRadius, tubeRadius, ringSegs, tubeSegs).rotateX(Math.PI/2);
         let stack_mat = new THREE.MeshPhongMaterial({color:0x8844aa});
@@ -16,6 +16,12 @@ export class TorusStack extends BaseModel{
             this.objects.push(new THREE.Mesh(stack_geo, stack_mat));
             this.objects.at(-1).position.y = i*0.5;
             this.setPosition(x, z);
+
+
+        }
+
+        if (Math.random() > 0.3){
+            this.objects.push(new HoveringLight(x, this.objects.at(-1).position.y + 0.5, z));
         }
     }
 
@@ -26,6 +32,37 @@ export class TorusStack extends BaseModel{
         }
         return this;
     }
+
+
+}
+
+export class HoveringLight extends BaseModel{
+    constructor(x, y, z, radius=0.5, material={color:0xFFFFF6}){
+        super();
+        let light_geo = new THREE.OctahedronGeometry(radius);
+        let light_mat = new THREE.MeshPhongMaterial(material);
+
+        this.objects.push(new THREE.Mesh(light_geo, light_mat));
+
+        let color = 0xAAAAAA;
+        let intensity = 0.7;
+
+        // let light = new THREE.PointLight(color, intensity);
+        // light.distance = 1;
+        // this.objects.push(light);
+
+        this.y = y;
+        for (let i = 0; i < this.objects.length; i++){
+            this.objects[i].position.set(x, y, z);
+        }
+        
+    }
+
+    render(time){
+        this.objects[0].position.y = this.y+Math.sin(time+this.objects[0].position.x);
+        
+        console.log(Math.sin(time));
+    }
 }
 
 
@@ -33,7 +70,7 @@ export class Wall extends BaseModel{
     constructor(w, h, d, material={color:0x4488aa}){
         super();
         let wall_geo = new THREE.BoxGeometry(w, h, d);
-        console.log(material)
+        //console.log(material)
         let wall_mat = new THREE.MeshPhongMaterial(material);
         
         this.objects.push(new THREE.Mesh(wall_geo, wall_mat));
@@ -110,16 +147,16 @@ export class BridgeUnit extends BaseModel{
             texture.repeat.set(repeats, 1);
             // 4 sides
             if (this.wallPos[0] == -1)
-                this.objects.push(new Wall(this.w, 1, 0.5, {map: texture}).setPosition(this.x, 1, this.z-SPACING));
+                this.objects.push(new Wall(this.w, 2, 0.5, {map: texture}).setPosition(this.x, 1.5, this.z-SPACING));
 
             if (this.wallPos[1] == -1)
-                this.objects.push(new Wall(0.5, 1, this.l, {map: texture}).setPosition(this.x-SPACING, 1, this.z));
+                this.objects.push(new Wall(0.5, 2, this.l, {map: texture}).setPosition(this.x-SPACING, 1.5, this.z));
         
             if (this.wallPos[2] == -1)
-                this.objects.push(new Wall(this.w, 1, 0.5, {map: texture}).setPosition(this.x, 1, this.z+SPACING));
+                this.objects.push(new Wall(this.w, 2, 0.5, {map: texture}).setPosition(this.x, 1.5, this.z+SPACING));
         
             if (this.wallPos[3] == -1)
-                this.objects.push(new Wall(0.5, 1, this.l, {map: texture}).setPosition(this.x+SPACING, 1, this.z));
+                this.objects.push(new Wall(0.5, 2, this.l, {map: texture}).setPosition(this.x+SPACING, 1.5, this.z));
 
             // 4 corners
             if (this.wallPos[0] == this.wallPos[1])

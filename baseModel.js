@@ -21,6 +21,18 @@ export class BaseModel {
     }
 
     addToScene(scene){
-        scene.add(...this.objects);
+        for (let obj of this.objects){
+            if (obj instanceof BaseModel)
+                obj.addToScene(scene);
+            else 
+                scene.add(obj);
+        }
+    }
+
+    render(time){
+        for (let obj of this.objects){
+            if (obj instanceof BaseModel)
+                obj.render(time);
+        }
     }
 }
