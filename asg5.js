@@ -12,6 +12,9 @@ import {OBJLoader} from './node_modules/three/examples/jsm/loaders/OBJLoader.js'
 import {MTLLoader} from './node_modules/three/examples/jsm/loaders/MTLLoader.js';
 import {OrbitControls} from './node_modules/three/examples/jsm/controls/OrbitControls.js';
 import {GUI} from './node_modules/lil-gui/dist/lil-gui.esm.min.js';
+import { Vector3 } from 'three';
+import { FirstPersonControls } from './node_modules/three/examples/jsm/controls/FirstPersonControls.js';
+
 let scene;
 
 
@@ -22,21 +25,34 @@ function main() {
     const loader = new THREE.TextureLoader();
 
 
-
+    let fpPos;
+    let tpPos = new Vector3(0, 10, 0);
+    let cat;
     
-    //const cameraMode;
+    let isThirdPerson = true;
 //    moveUp
 
-    const fov = 75;
-    const aspect = 2;  // the canvas default
-    const near = 0.1;
-    const far = 1000;
-    const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    camera.position.set(0, 30, 0);
+    // third person camera
+    const tPfov = 75;
+    const tPaspect = 2;  // the canvas default
+    const tPnear = 0.1;
+    const tPfar = 1000;
+    const tPcamera = new THREE.PerspectiveCamera(tPfov, tPaspect, tPnear, tPfar);
+    tPcamera.position.set(tpPos.x, tpPos.y, tpPos.z);
+
     
-    const controls = new OrbitControls(camera, canvas);
-    controls.target.set(0, 0, 0);
-    controls.update();
+    const tPcontrols = new OrbitControls(tPcamera, canvas);
+    tPcontrols.target.set(0, 0, 0);
+    tPcontrols.update();
+
+    let camera = tPcamera;
+
+
+    
+    // const tPcontrols = new OrbitControls(tPcamera, canvas);
+    // tPcontrols.target.set(0, 0, 0);
+    // tPcontrols.update();
+
 
     scene = new THREE.Scene();
 
@@ -49,13 +65,6 @@ function main() {
           scene.background = rt.texture;
     });
 
-    {
-        // const color = 0xFFFFFF;
-        // const intensity = 1;
-        // const light = new THREE.DirectionalLight(color, intensity);
-        // light.position.set(-1, 2, 4);
-        // scene.add(light);   
-    }
     
     const boxWidth = 1;
     const boxHeight = 1;
@@ -81,22 +90,39 @@ function main() {
         });
     }
 
-    {
-        const objLoader = new OBJLoader();
-        const mtlLoader = new MTLLoader();
-        mtlLoader.load('./resources/models/tubbs.mtl', (mtl) => {
-            mtl.preload();
-            objLoader.setMaterials(mtl);
-            let object = objLoader.load('./resources/models/tubbs.obj', (root) => {
-                root.scale.multiplyScalar(2);
-                let p = maze.getGridToLocal(1,1);
-                console.log(root.position);
-                root.position.set( p.x, 1, p.y);
-                scene.add(root);
-            });
-        });
-    }
+    // first person camera
+    const fPfov = 75;
+    const fPaspect = 2;  // the canvas default
+    const fPnear = 0.1;
+    const fPfar = 1000;
+    const fPcamera = new THREE.PerspectiveCamera(fPfov, fPaspect, fPnear, fPfar);
+    const fPcontrols = new FirstPersonControls(fPcamera, canvas);
+    fPcontrols.lookSpeed = 0.4;
+    fPcontrols.movementSpeed = 5;
+    fPcamera.enabled = false;
     
+
+    
+    const objLoader = new OBJLoader();
+    const mtlLoader = new MTLLoader();
+    mtlLoader.load('./resources/models/tubbs.mtl', (mtl) => {
+        mtl.preload();
+        objLoader.setMaterials(mtl);
+        let object = objLoader.load('./resources/models/tubbs.obj', (root) => {
+            root.scale.multiplyScalar(2);
+            let p = maze.getGridToLocal(1,1);
+            console.log(root.position);
+            root.position.set( p.x, 1, p.y);
+            
+            fPcamera.position.set( p.x, 1, p.y);
+            //root.attack(fPcamera)
+            scene.add(root);
+            cat = root;
+        });
+    });
+
+    
+    tpPos = new Vector3(0, 30, 0)
 
 
     {
@@ -182,19 +208,54 @@ function main() {
 
       canvas.addEventListener('keydown', (e) => {
         console.log("HELLO");
-        if (e.keyCode == 65){
-            spotlight.position.x -= 1;
-            spotlight.target.position.x -= 1;
-        } else if (e.keyCode == 68){
-            spotlight.position.x += 1;
-            spotlight.target.position.x += 1;
-        } else if (e.keyCode == 87) {
-            spotlight.position.z -= 1;
-            spotlight.target.position.z -= 1;
-        } else if (e.keyCode == 83){
-            spotlight.position.z += 1;
-            spotlight.target.position.z += 1;
+        if (e.keyCode == 32){
+            isThirdPerson = !isThirdPerson;
+            camera = (isThirdPerson) ? tPcamera : fPcamera;
+            fPcontrols.enabled = !isThirdPerson;
         }
+        let STEP = 0.5;
+
+        if (isThirdPerson){
+            if (e.keyCode == 65){
+                spotlight.position.x -= STEP;
+                spotlight.target.position.x -= STEP;
+                cat.position.x -= STEP;
+            } else if (e.keyCode == 68){
+                spotlight.position.x += STEP;
+                spotlight.target.position.x += STEP;
+                cat.position.x += STEP;
+            } else if (e.keyCode == 87) {
+                spotlight.position.z -= STEP;
+                spotlight.target.position.z -= STEP;
+                cat.position.z -= STEP;
+            } else if (e.keyCode == 83){
+                spotlight.position.z += STEP;
+                spotlight.target.position.z += STEP;
+                cat.position.z += STEP;
+            }     
+        } else {
+            // if (e.keyCode == 65){
+            //     spotlight.position.x -= STEP;
+            //     spotlight.target.position.x -= STEP;
+            //     cat.position.x -= STEP;
+            // } else if (e.keyCode == 68){
+            //     spotlight.position.x += STEP;
+            //     spotlight.target.position.x += STEP;
+            //     cat.position.x += STEP;
+            // } else if (e.keyCode == 87) {
+            //     spotlight.position.z -= STEP;
+            //     spotlight.target.position.z -= STEP;
+            //     cat.position.z -= STEP;
+            // } else if (e.keyCode == 83){
+            //     spotlight.position.z += STEP;
+            //     spotlight.target.position.z += STEP;
+            //     cat.position.z += STEP;
+            // } 
+    
+        }
+
+        
+        
     });
 
       const gui = new GUI();
@@ -250,6 +311,8 @@ function main() {
         makeXYZGUI(gui, light.position, 'position', updateLight);
         makeXYZGUI(gui, light.target.position, 'target', updateLight);
     }
+
+
     function render(time) {
         time *= 0.001;  // convert time to seconds
         if (resizeRendererToDisplaySize(renderer)) {
@@ -265,6 +328,7 @@ function main() {
             cube.rotation.y = rot;
         });
         maze.render(time);
+        fPcontrols.update(0.01);
         renderer.render(scene, camera);
        
         requestAnimationFrame(render);

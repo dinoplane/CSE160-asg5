@@ -16,9 +16,8 @@ export class TorusStack extends BaseModel{
             this.objects.push(new THREE.Mesh(stack_geo, stack_mat));
             this.objects.at(-1).position.y = i*0.5;
             this.setPosition(x, z);
-            // this.objects.at(-1).receiveShadow = true;
-            // this.objects.at(-1).castShadow = true;
-
+            this.objects.at(-1).castShadow = true;
+            this.objects.at(-1).receiveShadow = true;
 
         }
 
@@ -76,7 +75,7 @@ export class Wall extends BaseModel{
         let wall_mat = new THREE.MeshPhongMaterial(material);
         
         this.objects.push(new THREE.Mesh(wall_geo, wall_mat));
-        //this.objects.at(-1).castShadow = true;
+        this.objects.at(-1).castShadow = true;
         this.objects.at(-1).receiveShadow = true;
     }
 
