@@ -125,30 +125,30 @@ function main() {
     tpPos = new Vector3(0, 30, 0)
 
 
-    {
-        const planeSize = 40;
-        const texture = loader.load('./resources/images/checker.png');
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.magFilter = THREE.NearestFilter;
-        const repeats = planeSize / 2;
-        texture.repeat.set(repeats, repeats);
+    // {
+    //     const planeSize = 40;
+    //     const texture = loader.load('./resources/images/checker.png');
+    //     texture.wrapS = THREE.RepeatWrapping;
+    //     texture.wrapT = THREE.RepeatWrapping;
+    //     texture.magFilter = THREE.NearestFilter;
+    //     const repeats = planeSize / 2;
+    //     texture.repeat.set(repeats, repeats);
 
-        const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
-        const planeMat = new THREE.MeshBasicMaterial({
-        map: texture,
-        side: THREE.DoubleSide,
-        });
-        const mesh = new THREE.Mesh(planeGeo, planeMat);
-        mesh.receiveShadow = true;
-        mesh.rotation.x = Math.PI * -.5;
-        scene.add(mesh);
-    }
+    //     const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
+    //     const planeMat = new THREE.MeshBasicMaterial({
+    //     map: texture,
+    //     side: THREE.DoubleSide,
+    //     });
+    //     const mesh = new THREE.Mesh(planeGeo, planeMat);
+    //     mesh.receiveShadow = true;
+    //     mesh.rotation.x = Math.PI * -.5;
+    //     scene.add(mesh);
+    // }
 
     const cubes = [
         //makeInstance(geometry, 0x44aa88,  0),
-        makeInstance(geometry, 0x8844aa, -2),
-        makeInstance(geometry, 0xaa8844,  2),
+        // makeInstance(geometry, 0x8844aa, -2),
+        // makeInstance(geometry, 0xaa8844,  2),
     ];
 
 

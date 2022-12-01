@@ -1,9 +1,11 @@
 import * as THREE from 'three';
-import { Mesh, Scene, TorusGeometry } from "three";
+import { Mesh, Scene, ShaderMaterial, TorusGeometry } from "three";
 
 import { BaseModel } from './baseModel.js';
 
 import {VertexShader, FragmentShader} from './resources/shaders/HoverLight.js';
+import {FloorVertexShader, FloorFragmentShader} from './resources/shaders/Floor.js';
+
 
 const loader = new THREE.TextureLoader();
 
@@ -82,15 +84,37 @@ export class HoveringLight extends BaseModel{
 
 
 export class Wall extends BaseModel{
-    constructor(w, h, d, material={color:0xe3e0cd}){
+    constructor(w, h, d, material={color:0xe3e0cd}, shader=false){
         super();
         let wall_geo = new THREE.BoxGeometry(w, h, d);
         //console.log(material)
-        let wall_mat = new THREE.MeshPhongMaterial(material);
+        this.shader = shader;
+        if (shader){
+            this.wall_mat = new THREE.ShaderMaterial({
+
+                uniforms: {
+                    u_resolution: { value: new THREE.Vector2() },
+                    u_time: {type: 'f', value : 1.0}
+                },
+            
+                vertexShader: FloorVertexShader,
+            
+                fragmentShader: FloorFragmentShader
+            
+        });
+
+        let canvas = document.querySelector('#c');
+
+        this.wall_mat.uniforms['u_resolution'].value.x = canvas.width;
+        this.wall_mat.uniforms['u_resolution'].value.y = canvas.height;
+
+        }else 
+            this.wall_mat = new THREE.MeshPhongMaterial(material);
         
-        this.objects.push(new THREE.Mesh(wall_geo, wall_mat));
+        this.objects.push(new THREE.Mesh(wall_geo, this.wall_mat));
         this.objects.at(-1).castShadow = true;
         this.objects.at(-1).receiveShadow = true;
+
     }
 
     setPosition(x, y, z){
@@ -100,6 +124,12 @@ export class Wall extends BaseModel{
         this.objects[0].position.z = z;
         
         return this;
+    }
+
+    render(time){
+        if (this.shader){
+            this.wall_mat.uniforms['u_time'].value = time*2;
+        }
     }
 }
 
@@ -150,7 +180,7 @@ export class BridgeUnit extends BaseModel{
         
         //console.log(this.w, this.l)
 
-        this.objects.push(new Wall(this.w, 1, this.l).setPosition(this.x, 0, this.z));
+        this.objects.push(new Wall(this.w, 1, this.l, {color:0xe3e0cd}, true).setPosition(this.x, 0, this.z));
         
         this.objects.at(-1).receiveShadow = true;
         if (this.wallPos){ // top left bot right
