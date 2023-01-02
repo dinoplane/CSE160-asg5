@@ -12,17 +12,37 @@ import {OBJLoader} from './node_modules/three/examples/jsm/loaders/OBJLoader.js'
 import {MTLLoader} from './node_modules/three/examples/jsm/loaders/MTLLoader.js';
 import {OrbitControls} from './node_modules/three/examples/jsm/controls/OrbitControls.js';
 import {GUI} from './node_modules/lil-gui/dist/lil-gui.esm.min.js';
-import { Vector3 } from 'three';
+import { BackSide, Vector3 } from 'three';
 import { FirstPersonControls } from './node_modules/three/examples/jsm/controls/FirstPersonControls.js';
+import {SkyBoxVertexShader, SkyBoxFragmentShader} from './resources/shaders/SkyBox.js';
+import {PlayerControls, FirstPersonController} from './playerController.js'
 
+let canvas;
 let scene;
+
+let collideManager;
+
+let light;
+
+let fPcontrols;
+let startPos;
+
+function addActionsForHtmlUI(){
+
+}
+
+function addToScene(obj, col_tags={}){
+  
+}
 
 
 function main() {
-    const canvas = document.querySelector('#c');
+    canvas = document.querySelector('#c');
     const renderer = new THREE.WebGLRenderer({canvas});
     renderer.shadowMap.enabled = true;
     const loader = new THREE.TextureLoader();
+
+    addActionsForHtmlUI();
 
 
     let fpPos;
@@ -30,13 +50,12 @@ function main() {
     let cat;
     
     let isThirdPerson = true;
-//    moveUp
 
     // third person camera
     const tPfov = 75;
     const tPaspect = 2;  // the canvas default
     const tPnear = 0.1;
-    const tPfar = 1000;
+    const tPfar = 30000;
     const tPcamera = new THREE.PerspectiveCamera(tPfov, tPaspect, tPnear, tPfar);
     tPcamera.position.set(tpPos.x, tpPos.y, tpPos.z);
 
@@ -45,26 +64,51 @@ function main() {
     tPcontrols.target.set(0, 0, 0);
     tPcontrols.update();
 
-    let camera = tPcamera;
-
-
     
-    // const tPcontrols = new OrbitControls(tPcamera, canvas);
-    // tPcontrols.target.set(0, 0, 0);
-    // tPcontrols.update();
+
+
+    // first person camera
+    const fPfov = 75;
+    const fPaspect = 2;  // the canvas default
+    const fPnear = 0.1;
+    const fPfar = 2000;
+    const fPcamera = new THREE.PerspectiveCamera(fPfov, fPaspect, fPnear, fPfar);
+    
+
+    let camera = fPcamera;
 
 
     scene = new THREE.Scene();
 
     // Add a skybox
-    const texture = loader.load(
-        'resources/images/tears_of_steel_bridge_2k.jpg',
-        () => {
-          const rt = new THREE.WebGLCubeRenderTarget(texture.image.height);
-          rt.fromEquirectangularTexture(renderer, texture);
-          scene.background = rt.texture;
-    });
+    // const texture = loader.load(
+    //     'resources/images/tears_of_steel_bridge_2k.jpg',
+    //     () => {
+    //       const rt = new THREE.WebGLCubeRenderTarget(texture.image.height);
+    //       rt.fromEquirectangularTexture(renderer, texture);
+    //       scene.background = rt.texture;
+    // });
 
+    const SKYBOX_SIZE = 1000;
+    const skyBoxMat = new THREE.ShaderMaterial({
+        uniforms: {
+            u_size: {type: 'vec3', value: new THREE.Vector3(SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE)},
+            u_time: {type: 'f', value : 1.0}
+        },
+        // Put these shaders in their own file...
+        vertexShader: SkyBoxVertexShader,
+        fragmentShader: SkyBoxFragmentShader,
+        side: THREE.BackSide
+      });
+  
+    // const material = new THREE.MeshPhongMaterial({
+    //     map: loader.load('./resources/images/sky.png'), side: THREE.BackSide
+    // });
+
+    const skySphere = new THREE.SphereGeometry(SKYBOX_SIZE);
+    const skyBox = new THREE.Mesh(skySphere, skyBoxMat);
+
+    scene.add(skyBox);
     
     const boxWidth = 1;
     const boxHeight = 1;
@@ -74,8 +118,10 @@ function main() {
     // maze...
     let maze = new Maze(7, 7, [0,0], 40, 40);
     maze.addToScene(scene);
-
-    console.log(maze.getGridToLocal(1, 1));
+    
+    let startCoord = maze.getGridCoord(0);
+    startPos = maze.getGridToLocal(startCoord.x, startCoord.y);
+    fPcontrols = new FirstPersonController(canvas, fPcamera, [startPos.x, 1, startPos.y]);
 
 
     {
@@ -90,19 +136,6 @@ function main() {
         });
     }
 
-    // first person camera
-    const fPfov = 75;
-    const fPaspect = 2;  // the canvas default
-    const fPnear = 0.1;
-    const fPfar = 1000;
-    const fPcamera = new THREE.PerspectiveCamera(fPfov, fPaspect, fPnear, fPfar);
-    const fPcontrols = new FirstPersonControls(fPcamera, canvas);
-    fPcontrols.lookSpeed = 0.4;
-    fPcontrols.movementSpeed = 5;
-    fPcontrols.enabled = false;
-    
-
-    
     const objLoader = new OBJLoader();
     const mtlLoader = new MTLLoader();
     mtlLoader.load('./resources/models/tubbs.mtl', (mtl) => {
@@ -258,7 +291,7 @@ function main() {
         
     });
 
-      const gui = new GUI();
+      //const gui = new GUI();
       { // Hemisphere Light
         const skyColor = 0xB1E1FF;  // light blue
         const groundColor = 0xB97A20;  // brownish orange
@@ -266,18 +299,23 @@ function main() {
         const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
         scene.add(light);
     
-        gui.addColor(new ColorGUIHelper(light, 'color'), 'value').name('skyColor');
-        gui.addColor(new ColorGUIHelper(light, 'groundColor'), 'value').name('groundColor');
-        gui.add(light, 'intensity', 0, 1, 0.01);
+        // gui.addColor(new ColorGUIHelper(light, 'color'), 'value').name('skyColor');
+        // gui.addColor(new ColorGUIHelper(light, 'groundColor'), 'value').name('groundColor');
+        // gui.add(light, 'intensity', 0, 1, 0.01);
       }
 
+      //let helper;
 
+      function updateLight() {
+        light.target.updateMatrixWorld();
+        //helper.update();
+    }
     { // Directional Light
         const color = 0xFFFFFF;
         const intensity = 0.5;
-        const light = new THREE.DirectionalLight(color, intensity);
-        light.position.set(0, 20, 0);
-        light.target.position.set(-5, 0, 0);
+        light = new THREE.DirectionalLight(color, intensity);
+        light.position.set(20, 0, 0);
+        light.target.position.set(0, 0, 0);
         light.shadow.camera.left = -15;
         light.shadow.camera.bottom = -15;
         light.shadow.camera.right = 15;
@@ -287,32 +325,31 @@ function main() {
         scene.add(light);
         scene.add(light.target);
 
-        const helper = new THREE.DirectionalLightHelper(light);
-        scene.add(helper);
+        // helper = new THREE.DirectionalLightHelper(light);
+        // scene.add(helper);
 
-        function makeXYZGUI(gui, vector3, name, onChangeFn) {
-            const folder = gui.addFolder(name);
-            folder.add(vector3, 'x', -20, 20).onChange(onChangeFn);
-            folder.add(vector3, 'y', 0, 20).onChange(onChangeFn);
-            folder.add(vector3, 'z', -20, 20).onChange(onChangeFn);
-            folder.open();
-        }
+        // function makeXYZGUI(gui, vector3, name, onChangeFn) {
+        //     const folder = gui.addFolder(name);
+        //     folder.add(vector3, 'x', -20, 20).onChange(onChangeFn);
+        //     folder.add(vector3, 'y', 0, 20).onChange(onChangeFn);
+        //     folder.add(vector3, 'z', -20, 20).onChange(onChangeFn);
+        //     folder.open();
+        // }
 
-        function updateLight() {
-            light.target.updateMatrixWorld();
-            helper.update();
-        }
+
         updateLight();
 
 
-        gui.addColor(new ColorGUIHelper(light, 'color'), 'value').name('color');
-        gui.add(light, 'intensity', 0, 1, 0.01);
+        // gui.addColor(new ColorGUIHelper(light, 'color'), 'value').name('color');
+        // gui.add(light, 'intensity', 0, 1, 0.01);
 
-        makeXYZGUI(gui, light.position, 'position', updateLight);
-        makeXYZGUI(gui, light.target.position, 'target', updateLight);
+        // makeXYZGUI(gui, light.position, 'position', updateLight);
+        // makeXYZGUI(gui, light.target.position, 'target', updateLight);
+        
+
     }
 
-
+    
     function render(time) {
         time *= 0.001;  // convert time to seconds
         if (resizeRendererToDisplaySize(renderer)) {
@@ -321,16 +358,15 @@ function main() {
             camera.updateProjectionMatrix();
         }
 
-        cubes.forEach((cube, ndx) => {
-            const speed = 1 + ndx * .1;
-            const rot = time * speed;
-            cube.rotation.x = rot;
-            cube.rotation.y = rot;
-        });
         maze.render(time);
-        fPcontrols.update(0.01);
+        fPcontrols.update(time);
+        light.position.set(20*Math.cos(time), 20*Math.sin(time), 0);
+        light.target.position.set(0, 0, 0);
+        updateLight();
+        skyBox.rotation.z = time;
+        skyBoxMat.uniforms['u_time'].value = time;
         renderer.render(scene, camera);
-       
+        //console.log(fPcontrols.input.current)
         requestAnimationFrame(render);
       }
       requestAnimationFrame(render);

@@ -180,7 +180,7 @@ export class BridgeUnit extends BaseModel{
         
         //console.log(this.w, this.l)
 
-        this.objects.push(new Wall(this.w, 1, this.l, {color:0xe3e0cd}, true).setPosition(this.x, 0, this.z));
+        this.objects.push(new Wall(this.w, 1, this.l, {color:0xe3e0cd}).setPosition(this.x, 0, this.z));
         
         this.objects.at(-1).receiveShadow = true;
         if (this.wallPos){ // top left bot right
@@ -194,18 +194,20 @@ export class BridgeUnit extends BaseModel{
             texture.magFilter = THREE.NearestFilter;
             const repeats = 2;
             texture.repeat.set(repeats, 1);
+
+            let h_ = 0.1;
             // 4 sides
             if (this.wallPos[0] == -1)
-                this.objects.push(new Wall(this.w, 2, 0.5, {map: texture}).setPosition(this.x, 1.5, this.z-SPACING));
+                this.objects.push(new Wall(this.w, h_, 0.5, {map: texture}).setPosition(this.x, h_/2.0+0.5, this.z-SPACING));
 
             if (this.wallPos[1] == -1)
-                this.objects.push(new Wall(0.5, 2, this.l, {map: texture}).setPosition(this.x-SPACING, 1.5, this.z));
+                this.objects.push(new Wall(0.5, h_, this.l, {map: texture}).setPosition(this.x-SPACING, h_/2.0+0.5, this.z));
         
             if (this.wallPos[2] == -1)
-                this.objects.push(new Wall(this.w, 2, 0.5, {map: texture}).setPosition(this.x, 1.5, this.z+SPACING));
+                this.objects.push(new Wall(this.w, h_, 0.5, {map: texture}).setPosition(this.x, h_/2.0+0.5, this.z+SPACING));
         
             if (this.wallPos[3] == -1)
-                this.objects.push(new Wall(0.5, 2, this.l, {map: texture}).setPosition(this.x+SPACING, 1.5, this.z));
+                this.objects.push(new Wall(0.5, h_, this.l, {map: texture}).setPosition(this.x+SPACING, h_/2.0+0.5, this.z));
 
             // 4 corners
             if (this.wallPos[0] == this.wallPos[1])
@@ -221,16 +223,16 @@ export class BridgeUnit extends BaseModel{
                 this.objects.push(new TorusStack(this.x+SPACING, this.z-SPACING));
 
 
-            if (this.wallPos[0] > 0 &&  this.wallPos[1] > 0)
+            if (this.wallPos[0] >= 0 &&  this.wallPos[1] >= 0)
                 this.objects.push(new TorusStack(this.x-SPACING, this.z-SPACING));
 
-            if (this.wallPos[1] > 0 &&  this.wallPos[2] > 0)
+            if (this.wallPos[1] >= 0 &&  this.wallPos[2] >=0)
                 this.objects.push(new TorusStack(this.x-SPACING, this.z+SPACING));
 
-            if (this.wallPos[2] > 0 &&  this.wallPos[3] > 0)
+            if (this.wallPos[2] >= 0 &&  this.wallPos[3] >= 0)
             this.objects.push(new TorusStack(this.x+SPACING, this.z+SPACING));
 
-            if (this.wallPos[3] > 0 &&  this.wallPos[0] > 0)
+            if (this.wallPos[3] >= 0 &&  this.wallPos[0] >= 0)
                 this.objects.push(new TorusStack(this.x+SPACING, this.z-SPACING));
 
 
