@@ -131,6 +131,7 @@ export class Wall extends BaseModel{
             this.wall_mat.uniforms['u_time'].value = time*2;
         }
     }
+
 }
 
 export class BridgeUnit extends BaseModel{

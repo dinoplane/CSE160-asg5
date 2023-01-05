@@ -106,6 +106,8 @@ export class FirstPersonController{
         this.phi = 0;
         this.theta = 0;
         this.prevtime = null;
+
+        this.boundingBox = {};
     }
 
 

@@ -169,6 +169,7 @@ export class Maze {
 
     onCollide(obj){
         // Check the cell of the object
+        
         // Find the walls surrounding the tiles
         // Call the functions corresponding to that
     }

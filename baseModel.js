@@ -6,6 +6,7 @@ export class BaseModel {
         this.objects = [];
         this.setupVariables(...args);
         this.initParts();
+        this.boundingBox = {};
     }
 
     setupVariables(...args){
@@ -34,5 +35,9 @@ export class BaseModel {
             if (obj instanceof BaseModel)
                 obj.render(time);
         }
+    }
+
+    onCollide(obj){
+
     }
 }
