@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { Vector3 } from 'three';
+import { BaseModel } from './baseModel.js';
+import { BoundingBox } from './collideManager.js';
 // Adapted from https://www.youtube.com/watch?v=oqKzxPMLWxo
 
 
@@ -32,7 +34,7 @@ export class PlayerControls{
     }
 
     onMouseDown(e){
-        console.log("MouseDown")
+        //console.log("MouseDown")
         if (document.pointerLockElement != this.canvas){
             this.canvas.requestPointerLock();
             // this.current.mouseX = e.pageX - window.innerWidth / 2;
@@ -50,7 +52,7 @@ export class PlayerControls{
     }
 
     onMouseUp(e){
-        console.log("MouseUp");
+        //console.log("MouseUp");
         switch (e.button){
             case 0:
                 this.current.leftButton = false;
@@ -65,7 +67,7 @@ export class PlayerControls{
         if (document.pointerLockElement == this.canvas)
         {
 
-        console.log(this.keys);
+        //console.log(this.keys);
 
         if (this.previous === null){
             this.previous = {...this.current};
@@ -78,12 +80,12 @@ export class PlayerControls{
     }
 
     onKeyDown(e){
-        console.log("Keydown")
+        //console.log("Keydown")
         this.keys[e.keyCode] = true;
     }
 
     onKeyUp(e){
-        console.log("keyup");
+        //console.log("keyup");
         this.keys[e.keyCode] = false;                                
     }
 
@@ -98,7 +100,7 @@ export class PlayerControls{
 
 
 export class FirstPersonController{
-    constructor(canvas_, camera_, initpos){
+    constructor(canvas_, camera_, initpos, w, h){
         this.camera = camera_;
         this.input = new PlayerControls(canvas_);
         this.rotation = new THREE.Quaternion();
@@ -107,7 +109,7 @@ export class FirstPersonController{
         this.theta = 0;
         this.prevtime = null;
 
-        this.boundingBox = {};
+        this.boundingBox = new BoundingBox(initpos[0], initpos[2], w/4, h/4);
     }
 
 
@@ -129,9 +131,7 @@ export class FirstPersonController{
         const xh = this.input.current.mouseXDelta / window.innerWidth;
         const yh = this.input.current.mouseYDelta / window.innerHeight;
         
-        this.phi += -xh * 5;
-
-        
+        this.phi += -xh * 5;        
         
         this.theta = THREE.MathUtils.clamp(this.theta + -yh *5, -Math.PI / 3, Math.PI / 3);
 

@@ -14,6 +14,14 @@ export class Maze {
 
         this.gw = width*2+1;
         this.gh = height*2+1
+
+        this.startX = -this.totalWidth/2;
+        this.startY = -this.totalHeight/2;
+
+        // Divide up the space into w*h tiles
+        this.tWidth = this.totalWidth/this.gw;
+        this.tHeight = this.totalHeight/this.gh;
+
         for (let i = 0; i < this.gh; i++){ 
             if (i % 2 == 0){
                 this.grid.push(new Array(this.gw).fill(1));
@@ -45,9 +53,13 @@ export class Maze {
 
 
         this.objects = [];
-        console.log(this.grid)
+        //console.log(this.grid)
         this.generateMaze();
         this.initParts();
+
+        
+        console.log(this.grid);
+        console.log(this.objects)
     }
 
     getCoords(node) {
@@ -113,7 +125,6 @@ export class Maze {
             //console.log(stack.length)
         }
 
-        console.log(this.adjacency);
 
     }
     
@@ -148,8 +159,8 @@ export class Maze {
             let gridCoord = this.getGridCoord(i);
             let localCoord = this.getGridToLocal(gridCoord.x, gridCoord.y);
             //console.log(localCoord)
-            let tWidth = this.totalWidth/this.gw;
-            let tHeight = this.totalHeight/this.gh;
+            let tWidth = this.totalWidth/this.gw *0.9;
+            let tHeight = this.totalHeight/this.gh *0.9;
 
             //console.log(tWidth)
 
@@ -167,27 +178,28 @@ export class Maze {
         }
     }
 
-    onCollide(obj){
+    onCollide(obj){ // only used between maze and player
         // Check the cell of the object
-        
+        let grid = maze.getLocalToGrid(fPcontrols.translation.x, fPcontrols.translation.z);
         // Find the walls surrounding the tiles
         // Call the functions corresponding to that
     }
 
+    getLocalToGrid(x, y){
+        return {gridX: Math.floor((x - this.startX)/this.tWidth), gridY: Math.floor((y- this.startY)/this.tHeight)}; 
+    }
+
     getGridToLocal(gridX, gridY){
-        let startX = -this.totalWidth/2;
-        let startY = -this.totalHeight/2;
+        // let startX = -this.totalWidth/2;
+        // let startY = -this.totalHeight/2;
         //console.log(startX)
-        let endX = this.totalWidth/2;
-        let endY = this.totalHeight/2;
+        // let endX = this.totalWidth/2;
+        // let endY = this.totalHeight/2;
 
-        let padding = 0.25;
-        // Divide up the space into w*h tiles
-        let tWidth = this.totalWidth/this.gw;
-        let tHeight = this.totalHeight/this.gh;
+        // let padding = 0.25;
 
 
-        return {x: startX+ (gridX + 0.5)*tWidth, y: startY + (gridY + 0.5)*tHeight}
+        return {x: this.startX + (gridX + 0.5)*this.tWidth, y: this.startY + (gridY + 0.5)*this.tHeight}
     }
 
     getGridCoord(cell, chosenIndex){

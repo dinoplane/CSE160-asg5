@@ -6,6 +6,8 @@ import { BaseModel } from './baseModel.js';
 import {VertexShader, FragmentShader} from './resources/shaders/HoverLight.js';
 import {FloorVertexShader, FloorFragmentShader} from './resources/shaders/Floor.js';
 
+import { BoundingBox } from './collideManager.js';
+
 
 const loader = new THREE.TextureLoader();
 
@@ -84,7 +86,7 @@ export class HoveringLight extends BaseModel{
 
 
 export class Wall extends BaseModel{
-    constructor(w, h, d, material={color:0xe3e0cd}, shader=false){
+    constructor(w, h, d, material={color:0xe3e0cd}, pos, shader=false){
         super();
         let wall_geo = new THREE.BoxGeometry(w, h, d);
         //console.log(material)
@@ -115,6 +117,9 @@ export class Wall extends BaseModel{
         this.objects.at(-1).castShadow = true;
         this.objects.at(-1).receiveShadow = true;
 
+        this.setPosition(...pos);
+
+        this.boundingBox = new BoundingBox(pos[0], pos[2], w, d);
     }
 
     setPosition(x, y, z){
@@ -122,8 +127,14 @@ export class Wall extends BaseModel{
         this.objects[0].position.x = x;
         this.objects[0].position.y = y;
         this.objects[0].position.z = z;
+
+        
         
         return this;
+    }
+
+    onCollide(obj){ // assume both objects have bounding boxes
+
     }
 
     render(time){
@@ -181,7 +192,7 @@ export class BridgeUnit extends BaseModel{
         
         //console.log(this.w, this.l)
 
-        this.objects.push(new Wall(this.w, 1, this.l, {color:0xe3e0cd}).setPosition(this.x, 0, this.z));
+        this.objects.push(new Wall(this.w, 1, this.l, {color:0xe3e0cd}, [this.x, 0, this.z]));
         
         this.objects.at(-1).receiveShadow = true;
         if (this.wallPos){ // top left bot right
@@ -199,16 +210,16 @@ export class BridgeUnit extends BaseModel{
             let h_ = 0.1;
             // 4 sides
             if (this.wallPos[0] == -1)
-                this.objects.push(new Wall(this.w, h_, 0.5, {map: texture}).setPosition(this.x, h_/2.0+0.5, this.z-SPACING));
+                this.objects.push(new Wall(this.w, h_, 0.5, {map: texture}, [this.x, h_/2.0+0.5, this.z-SPACING]));
 
             if (this.wallPos[1] == -1)
-                this.objects.push(new Wall(0.5, h_, this.l, {map: texture}).setPosition(this.x-SPACING, h_/2.0+0.5, this.z));
+                this.objects.push(new Wall(0.5, h_, this.l, {map: texture}, [this.x-SPACING, h_/2.0+0.5, this.z]));
         
             if (this.wallPos[2] == -1)
-                this.objects.push(new Wall(this.w, h_, 0.5, {map: texture}).setPosition(this.x, h_/2.0+0.5, this.z+SPACING));
+                this.objects.push(new Wall(this.w, h_, 0.5, {map: texture}, [this.x, h_/2.0+0.5, this.z+SPACING]));
         
             if (this.wallPos[3] == -1)
-                this.objects.push(new Wall(0.5, h_, this.l, {map: texture}).setPosition(this.x+SPACING, h_/2.0+0.5, this.z));
+                this.objects.push(new Wall(0.5, h_, this.l, {map: texture}, [this.x+SPACING, h_/2.0+0.5, this.z]));
 
             // 4 corners
             if (this.wallPos[0] == this.wallPos[1])

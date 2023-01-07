@@ -16,6 +16,7 @@ import { BackSide, Vector3 } from 'three';
 import { FirstPersonControls } from './node_modules/three/examples/jsm/controls/FirstPersonControls.js';
 import {SkyBoxVertexShader, SkyBoxFragmentShader} from './resources/shaders/SkyBox.js';
 import {PlayerControls, FirstPersonController} from './playerController.js'
+import { CollideManager } from './collideManager.js';
 
 let canvas;
 let scene;
@@ -41,6 +42,8 @@ function main() {
     const renderer = new THREE.WebGLRenderer({canvas});
     renderer.shadowMap.enabled = true;
     const loader = new THREE.TextureLoader();
+
+    collideManager = new CollideManager();
 
     addActionsForHtmlUI();
 
@@ -116,12 +119,12 @@ function main() {
     const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
 
     // maze...
-    let maze = new Maze(7, 7, [0,0], 40, 40);
+    let maze = new Maze(3,3, [0,0], 40, 40);
     maze.addToScene(scene);
     
     let startCoord = maze.getGridCoord(0);
     startPos = maze.getGridToLocal(startCoord.x, startCoord.y);
-    fPcontrols = new FirstPersonController(canvas, fPcamera, [startPos.x, 1, startPos.y]);
+    fPcontrols = new FirstPersonController(canvas, fPcamera, [startPos.x, 1, startPos.y], maze.gw, maze.gh);
 
 
     {
@@ -240,7 +243,7 @@ function main() {
       
 
       canvas.addEventListener('keydown', (e) => {
-        console.log("HELLO");
+        //console.log("HELLO");
         if (e.keyCode == 32){
             isThirdPerson = !isThirdPerson;
             camera = (isThirdPerson) ? tPcamera : fPcamera;
@@ -357,8 +360,9 @@ function main() {
             camera.aspect = canvas.clientWidth / canvas.clientHeight;
             camera.updateProjectionMatrix();
         }
-
+        //collideManager.checkCollide(maze, fPcontrols);
         maze.render(time);
+        
         fPcontrols.update(time);
         light.position.set(20*Math.cos(time), 20*Math.sin(time), 0);
         light.target.position.set(0, 0, 0);
