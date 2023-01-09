@@ -16,7 +16,8 @@
 <canvas id="c" tabindex="0"></canvas>
   <script  type="importmap">{
 	"imports": {
-		"three": "./node_modules/three/build/three.module.js"
+		"three": "./node_modules/three/build/three.module.js",
+    "postprocessing": "./node_modules/postprocessing/build/postprocessing.esm.js"
     }
   }</script><!-- Remove this when import maps will be widely supported -->
 </body>
@@ -27,6 +28,9 @@
 <script type="module" src="bridge.js"></script>
 <script type="module" src="maze.js"></script>
 <script type="module" src="playerController.js"></script>
+<script type="module" src="field.js"></script>
+<script type="module" src="collideManager.js"></script>
+<script type="module" src="MeshReflectorMaterial.js"></script>
 
 
 

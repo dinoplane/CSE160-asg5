@@ -259,3 +259,120 @@ export class BridgeUnit extends BaseModel{
         }
     }
 }
+
+
+export class WheatUnit extends BaseModel{
+    constructor(x=0, z=0, wallPos, w, l){
+    //    / console.log(args)
+        super(x, z, wallPos, w, l);
+
+    }
+
+    setupVariables(...args){
+        this.x = args[0];
+        this.z = args[1];
+        this.wallPos = args[2];
+        this.w = args[3];
+        this.l = args[4];
+    }
+
+    initParts(){
+        // let stack_geo = new THREE.TorusGeometry(1, 0.25, 6, 6).rotateX(Math.PI/2);
+        // let stack_mat = new THREE.MeshPhongMaterial({color:0x8844aa});
+        // let wall_geo = new THREE.BoxGeometry(4, 2, 1);
+        // let wall_mat = new THREE.MeshPhongMaterial({color:0x4488aa});
+
+
+
+        // // walls
+        // for (let i = 0; i < 2; i++){
+        //     this.objects.push(new THREE.Mesh(wall_geo, wall_mat));
+        //     this.objects.at(-1).position.x = -3 + i*6;
+        //     this.objects.at(-1).position.z = this.w/2;
+        // }
+
+        // // stack of toruses
+        // for (let i = 0; i < 3; i++){
+        //     this.objects.push(new THREE.Mesh(stack_geo, stack_mat));
+        //     this.objects.at(-1).position.y = i*0.5;
+        //     console.log(this.w)
+        //     this.objects.at(-1).position.z = -this.w/2;
+        // }
+
+        // // walls
+        // for (let i = 0; i < 2; i++){
+        //     this.objects.push(new THREE.Mesh(wall_geo, wall_mat));
+        //     this.objects.at(-1).position.x = -3 + i*6;
+        //     this.objects.at(-1).position.z = -this.w/2;
+        // }
+        
+        //console.log(this.w, this.l)
+
+        this.objects.push(new Wall(this.w, 1, this.l, {color:0xe3e0cd}, [this.x, 0, this.z]));
+        
+        this.objects.at(-1).receiveShadow = true;
+        if (this.wallPos){ // top left bot right
+            //console.log(this.wallPos);
+            let SPACING = this.w/2 -0.25;
+
+            let texture = loader.load('./resources/images/fish.png')
+
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.magFilter = THREE.NearestFilter;
+            const repeats = 2;
+            texture.repeat.set(repeats, 1);
+
+            let h_ = 0.1;
+            // 4 sides
+            if (this.wallPos[0] == -1)
+                this.objects.push(new Wall(this.w, h_, 0.5, {map: texture}, [this.x, h_/2.0+0.5, this.z-SPACING]));
+
+            if (this.wallPos[1] == -1)
+                this.objects.push(new Wall(0.5, h_, this.l, {map: texture}, [this.x-SPACING, h_/2.0+0.5, this.z]));
+        
+            if (this.wallPos[2] == -1)
+                this.objects.push(new Wall(this.w, h_, 0.5, {map: texture}, [this.x, h_/2.0+0.5, this.z+SPACING]));
+        
+            if (this.wallPos[3] == -1)
+                this.objects.push(new Wall(0.5, h_, this.l, {map: texture}, [this.x+SPACING, h_/2.0+0.5, this.z]));
+
+            // 4 corners
+            if (this.wallPos[0] == this.wallPos[1])
+                this.objects.push(new TorusStack(this.x-SPACING, this.z-SPACING));
+
+            if (this.wallPos[1] == this.wallPos[2])
+                this.objects.push(new TorusStack(this.x-SPACING, this.z+SPACING));
+
+            if (this.wallPos[2] == this.wallPos[3])
+                this.objects.push(new TorusStack(this.x+SPACING, this.z+SPACING));
+
+            if (this.wallPos[3] == this.wallPos[0])
+                this.objects.push(new TorusStack(this.x+SPACING, this.z-SPACING));
+
+
+            if (this.wallPos[0] >= 0 &&  this.wallPos[1] >= 0)
+                this.objects.push(new TorusStack(this.x-SPACING, this.z-SPACING));
+
+            if (this.wallPos[1] >= 0 &&  this.wallPos[2] >=0)
+                this.objects.push(new TorusStack(this.x-SPACING, this.z+SPACING));
+
+            if (this.wallPos[2] >= 0 &&  this.wallPos[3] >= 0)
+            this.objects.push(new TorusStack(this.x+SPACING, this.z+SPACING));
+
+            if (this.wallPos[3] >= 0 &&  this.wallPos[0] >= 0)
+                this.objects.push(new TorusStack(this.x+SPACING, this.z-SPACING));
+
+
+        }
+        
+    }
+
+    addToScene(scene){
+        for (let i = 0; i < this.objects.length; i++){
+            //console.log(this.objects[i]);
+            this.objects[i].addToScene(scene);
+        }
+    }
+}
+

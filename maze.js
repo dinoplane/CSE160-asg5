@@ -11,9 +11,9 @@ export class Maze {
         this.totalWidth = tot_w;
         this.totalHeight = tot_h;
 
-
+        // Grid dimensions
         this.gw = width*2+1;
-        this.gh = height*2+1
+        this.gh = height*2+1;
 
         this.startX = -this.totalWidth/2;
         this.startY = -this.totalHeight/2;
@@ -22,23 +22,29 @@ export class Maze {
         this.tWidth = this.totalWidth/this.gw;
         this.tHeight = this.totalHeight/this.gh;
 
-        for (let i = 0; i < this.gh; i++){ 
+        // make a grid representing empty tiles and walls. 
+        this.grid.push(new Array(this.gw).fill(1));
+        for (let i = 1; i < this.gh - 1; i++){     
+            let row = [1]
             if (i % 2 == 0){
                 this.grid.push(new Array(this.gw).fill(1));
             } else {
-                let row = [1]
                 for (let j = 1; j < this.gw-1; j++){
                     //if (i % 2) row.push(0);
-                    
-                        if (j % 2) row.push(0);
-                        else row.push(1);
+                
+                    if (j % 2) row.push(0);
+                    else row.push(1);
                     
                 }
                 row.push(1);
-                this.grid.push(row.slice());
+                this.grid.push(row);
             }
-            // console.log(this.grid);
+
         }
+        
+        this.grid.push(new Array(this.gw).fill(1));
+        console.log(this.grid);
+        
         //console.log(this.grid);
         // for (let i = 1; i < this.h-1; i++){
         //     this.grid[Math.floor(this.w/2)][i] = 0;

@@ -12,11 +12,13 @@ import {OBJLoader} from './node_modules/three/examples/jsm/loaders/OBJLoader.js'
 import {MTLLoader} from './node_modules/three/examples/jsm/loaders/MTLLoader.js';
 import {OrbitControls} from './node_modules/three/examples/jsm/controls/OrbitControls.js';
 import {GUI} from './node_modules/lil-gui/dist/lil-gui.esm.min.js';
-import { BackSide, Vector3 } from 'three';
+import { BackSide, PlaneGeometry, Vector3 } from 'three';
 import { FirstPersonControls } from './node_modules/three/examples/jsm/controls/FirstPersonControls.js';
 import {SkyBoxVertexShader, SkyBoxFragmentShader} from './resources/shaders/SkyBox.js';
 import {PlayerControls, FirstPersonController} from './playerController.js'
 import { CollideManager } from './collideManager.js';
+import { Field } from './field.js';
+
 
 let canvas;
 let scene;
@@ -43,13 +45,16 @@ function main() {
     renderer.shadowMap.enabled = true;
     const loader = new THREE.TextureLoader();
 
+
+    
+
     collideManager = new CollideManager();
 
     addActionsForHtmlUI();
 
 
     let fpPos;
-    let tpPos = new Vector3(0, 30, 0);
+    let tpPos = new Vector3(10, 30, 10);
     let cat;
     
     let isThirdPerson = true;
@@ -61,14 +66,10 @@ function main() {
     const tPfar = 30000;
     const tPcamera = new THREE.PerspectiveCamera(tPfov, tPaspect, tPnear, tPfar);
     tPcamera.position.set(tpPos.x, tpPos.y, tpPos.z);
-
     
     const tPcontrols = new OrbitControls(tPcamera, canvas);
     tPcontrols.target.set(0, 0, 0);
     tPcontrols.update();
-
-    
-
 
     // first person camera
     const fPfov = 75;
@@ -79,6 +80,8 @@ function main() {
     
 
     let camera = fPcamera;
+
+    
 
 
     scene = new THREE.Scene();
@@ -127,6 +130,7 @@ function main() {
     fPcontrols = new FirstPersonController(canvas, fPcamera, [startPos.x, 1, startPos.y], maze.gw, maze.gh);
 
 
+
     {
         const objLoader = new OBJLoader();
         const mtlLoader = new MTLLoader();
@@ -160,34 +164,26 @@ function main() {
     
     tpPos = new Vector3(0, 30, 0)
 
+    // let planeSize = 40;
+    // const planeMat = new THREE.MeshBasicMaterial();
+    // const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
+    // let field = new THREE.Mesh(planeGeo, planeMat);
+    // scene.add(field);
+    {
 
-    // {
-    //     const planeSize = 40;
-    //     const texture = loader.load('./resources/images/checker.png');
-    //     texture.wrapS = THREE.RepeatWrapping;
-    //     texture.wrapT = THREE.RepeatWrapping;
-    //     texture.magFilter = THREE.NearestFilter;
-    //     const repeats = planeSize / 2;
-    //     texture.repeat.set(repeats, repeats);
-
-    //     const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
-    //     const planeMat = new THREE.MeshBasicMaterial({
-    //     map: texture,
-    //     side: THREE.DoubleSide,
-    //     });
-    //     const mesh = new THREE.Mesh(planeGeo, planeMat);
-    //     mesh.receiveShadow = true;
-    //     mesh.rotation.x = Math.PI * -.5;
-    //     scene.add(mesh);
-    // }
-
-    const cubes = [
-        //makeInstance(geometry, 0x44aa88,  0),
-        // makeInstance(geometry, 0x8844aa, -2),
-        // makeInstance(geometry, 0xaa8844,  2),
-    ];
+        
+        // const texture = loader.load('./resources/images/checker.png');
+        // texture.wrapS = THREE.RepeatWrapping;
+        // texture.wrapT = THREE.RepeatWrapping;
+        // texture.magFilter = THREE.NearestFilter;
+        // const repeats = planeSize / 2;
+        // texture.repeat.set(repeats, repeats);
 
 
+    }
+
+    let field = new Field(renderer, camera, scene);
+    field.addToScene(scene);
 
     function makeInstance(geometry, color, x) {
         const material = new THREE.MeshPhongMaterial({
@@ -200,6 +196,10 @@ function main() {
     
         return cube;
     }
+
+
+    
+
 
     function resizeRendererToDisplaySize(renderer) {
         const canvas = renderer.domElement;
@@ -362,6 +362,7 @@ function main() {
         }
         //collideManager.checkCollide(maze, fPcontrols);
         maze.render(time);
+        field.render(time, renderer, scene);
         
         fPcontrols.update(time);
         light.position.set(20*Math.cos(time), 20*Math.sin(time), 0);
@@ -370,6 +371,8 @@ function main() {
         skyBox.rotation.z = time;
         skyBoxMat.uniforms['u_time'].value = time;
         renderer.render(scene, camera);
+
+
         //console.log(fPcontrols.input.current)
         requestAnimationFrame(render);
       }
