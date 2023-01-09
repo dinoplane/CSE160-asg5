@@ -1,7 +1,12 @@
 {
   "dependencies": {
+    "gh-pages": "^4.0.0",
     "lil-gui": "^0.17.0",
     "postprocessing": "^6.29.3",
     "three": "^0.146.0"
+  },
+  
+  "scripts": {
+    "deploy": "gh-pages -d"
   }
 }
