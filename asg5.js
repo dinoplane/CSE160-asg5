@@ -30,6 +30,10 @@ let light;
 let fPcontrols;
 let startPos;
 
+const dayColor = new Vector3(0.548, 0.425, 0.922 );
+const nightColor = new Vector3( 0.0, 0.0, 0.0 );
+let skyColor;
+
 function addActionsForHtmlUI(){
 
 }
@@ -54,7 +58,7 @@ function main() {
 
 
     let fpPos;
-    let tpPos = new Vector3(10, 30, 10);
+    let tpPos = new Vector3(10, 10, 10);
     let cat;
     
     let isThirdPerson = true;
@@ -106,7 +110,7 @@ function main() {
         fragmentShader: SkyBoxFragmentShader,
         side: THREE.BackSide
       });
-  
+
     // const material = new THREE.MeshPhongMaterial({
     //     map: loader.load('./resources/images/sky.png'), side: THREE.BackSide
     // });
@@ -130,6 +134,13 @@ function main() {
     fPcontrols = new FirstPersonController(canvas, fPcamera, [startPos.x, 1, startPos.y], maze.gw, maze.gh);
 
 
+
+    // Fog
+    const near = 1;
+    const far = 3;
+    const fogColor = 'lightblue';
+    scene.fog = new THREE.Fog(fogColor, near, far);
+    
 
     {
         const objLoader = new OBJLoader();
@@ -249,47 +260,7 @@ function main() {
             camera = (isThirdPerson) ? tPcamera : fPcamera;
             fPcontrols.enabled = !isThirdPerson;
         }
-        let STEP = 0.5;
-
-        if (isThirdPerson){
-            if (e.keyCode == 65){
-                spotlight.position.x -= STEP;
-                spotlight.target.position.x -= STEP;
-                cat.position.x -= STEP;
-            } else if (e.keyCode == 68){
-                spotlight.position.x += STEP;
-                spotlight.target.position.x += STEP;
-                cat.position.x += STEP;
-            } else if (e.keyCode == 87) {
-                spotlight.position.z -= STEP;
-                spotlight.target.position.z -= STEP;
-                cat.position.z -= STEP;
-            } else if (e.keyCode == 83){
-                spotlight.position.z += STEP;
-                spotlight.target.position.z += STEP;
-                cat.position.z += STEP;
-            }     
-        } else {
-            // if (e.keyCode == 65){
-            //     spotlight.position.x -= STEP;
-            //     spotlight.target.position.x -= STEP;
-            //     cat.position.x -= STEP;
-            // } else if (e.keyCode == 68){
-            //     spotlight.position.x += STEP;
-            //     spotlight.target.position.x += STEP;
-            //     cat.position.x += STEP;
-            // } else if (e.keyCode == 87) {
-            //     spotlight.position.z -= STEP;
-            //     spotlight.target.position.z -= STEP;
-            //     cat.position.z -= STEP;
-            // } else if (e.keyCode == 83){
-            //     spotlight.position.z += STEP;
-            //     spotlight.target.position.z += STEP;
-            //     cat.position.z += STEP;
-            // } 
-    
-        }
-
+        
         
         
     });
@@ -307,11 +278,11 @@ function main() {
         // gui.add(light, 'intensity', 0, 1, 0.01);
       }
 
-      //let helper;
+    let helper;
 
-      function updateLight() {
+    function updateLight() {
         light.target.updateMatrixWorld();
-        //helper.update();
+        helper.update();
     }
     { // Directional Light
         const color = 0xFFFFFF;
@@ -328,8 +299,8 @@ function main() {
         scene.add(light);
         scene.add(light.target);
 
-        // helper = new THREE.DirectionalLightHelper(light);
-        // scene.add(helper);
+        helper = new THREE.DirectionalLightHelper(light);
+        scene.add(helper);
 
         // function makeXYZGUI(gui, vector3, name, onChangeFn) {
         //     const folder = gui.addFolder(name);
@@ -351,7 +322,29 @@ function main() {
         
 
     }
+  
 
+    function mix(x, y, a){
+        let ret = new Vector3(x.x, x.y, x.z);
+        let j = new Vector3(y.x, y.y, y.z);
+
+        return ret.multiplyScalar(1 - a).add(j.multiplyScalar(a));
+    }
+    function hsv2rgb(c){
+
+        let rx = c.x;
+        let ry = c.y;
+        let rz = c.z;
+
+
+        ry = THREE.MathUtils.clamp(Math.abs(THREE.MathUtils.euclideanModulo(rx*6.0+4.0, 6.0) - 3.0) - 1.0, 0.0, 1.0);
+        rz = THREE.MathUtils.clamp(Math.abs(THREE.MathUtils.euclideanModulo(rx*6.0+2.0, 6.0) - 3.0) - 1.0, 0.0, 1.0);
+        rx = THREE.MathUtils.clamp(Math.abs(THREE.MathUtils.euclideanModulo(rx*6.0, 6.0) - 3.0) - 1.0, 0.0, 1.0);
+
+        let rgb = new Vector3(rx, ry, rz);
+
+        return mix(new Vector3(1.0, 1.0, 1.0), rgb, c.y).multiplyScalar(c.z);
+    }
     
     function render(time) {
         time *= 0.001;  // convert time to seconds
@@ -361,11 +354,16 @@ function main() {
             camera.updateProjectionMatrix();
         }
         //collideManager.checkCollide(maze, fPcontrols);
-        maze.render(time);
+        //console.log(camera.position)
+        maze.render(time, {lightPos: light.position, lightIntensity: light.intensity, cameraPos: camera.position});
         field.render(time, renderer, scene);
-        
+        skyColor = hsv2rgb(mix(dayColor, nightColor, (Math.sin(time+Math.PI)+1.0)/2.0));
+        console.log(skyColor)
+        scene.background = new THREE.Color(skyColor);
+        scene.fog.color = new THREE.Color(skyColor.x, skyColor.y, skyColor.z);
         fPcontrols.update(time);
-        light.position.set(20*Math.cos(time), 20*Math.sin(time), 0);
+        light.position.set(10*Math.cos(time), 10, 0);
+        
         light.target.position.set(0, 0, 0);
         updateLight();
         skyBox.rotation.z = time;

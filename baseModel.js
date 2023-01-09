@@ -30,10 +30,10 @@ export class BaseModel {
         }
     }
 
-    render(time){
+    render(time, uniforms){
         for (let obj of this.objects){
             if (obj instanceof BaseModel)
-                obj.render(time);
+                obj.render(time, uniforms);
         }
     }
 

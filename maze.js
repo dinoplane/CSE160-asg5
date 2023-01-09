@@ -165,8 +165,8 @@ export class Maze {
             let gridCoord = this.getGridCoord(i);
             let localCoord = this.getGridToLocal(gridCoord.x, gridCoord.y);
             //console.log(localCoord)
-            let tWidth = this.totalWidth/this.gw *0.9;
-            let tHeight = this.totalHeight/this.gh *0.9;
+            let tWidth = this.totalWidth/this.gw *0.95;
+            let tHeight = this.totalHeight/this.gh *0.95;
 
             //console.log(tWidth)
 
@@ -237,10 +237,11 @@ export class Maze {
     //     }
     // }
 
-    render(time){
+    render(time, uniforms){
         for (let obj of this.objects){
+            
             if (obj instanceof BaseModel)
-                obj.render(time);
+                obj.render(time, uniforms);
         }
     }
 

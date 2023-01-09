@@ -94,14 +94,22 @@ export class Wall extends BaseModel{
         if (shader){
             this.wall_mat = new THREE.ShaderMaterial({
 
-                uniforms: {
-                    u_resolution: { value: new THREE.Vector2() },
-                    u_time: {type: 'f', value : 1.0}
-                },
+                uniforms: THREE.UniformsUtils.merge([
+                    THREE.UniformsLib[ 'fog' ],
+                    {
+                        u_resolution: { value: new THREE.Vector2() },
+                        u_time: {type: 'f', value : 1.0},
+                        u_LightIntensity: {type: 'f', value : 1.0},
+                        u_LightPos: {value : new THREE.Vector3()},
+                        u_CameraPos: {value : new THREE.Vector3()},
+                        u_Slice: {value: this.generateTransform()}
+                    }]),
             
                 vertexShader: FloorVertexShader,
             
-                fragmentShader: FloorFragmentShader
+                fragmentShader: FloorFragmentShader,
+
+                fog: true
             
         });
 
@@ -109,9 +117,13 @@ export class Wall extends BaseModel{
 
         this.wall_mat.uniforms['u_resolution'].value.x = canvas.width;
         this.wall_mat.uniforms['u_resolution'].value.y = canvas.height;
+        
 
         }else 
             this.wall_mat = new THREE.MeshPhongMaterial(material);
+
+        
+        this.wall_mat.flatShading = true;
         
         this.objects.push(new THREE.Mesh(wall_geo, this.wall_mat));
         this.objects.at(-1).castShadow = true;
@@ -120,6 +132,15 @@ export class Wall extends BaseModel{
         this.setPosition(...pos);
 
         this.boundingBox = new BoundingBox(pos[0], pos[2], w, d);
+    }
+
+    generateTransform(){
+        let ret = new THREE.Matrix4();
+
+        ret.makeTranslation(Math.random()- 0.5, Math.random()-0.5, Math.random()-0.5);
+        ret.scale(new THREE.Vector3(Math.random(), 1.0, Math.random()));
+
+        return ret; 
     }
 
     setPosition(x, y, z){
@@ -137,9 +158,14 @@ export class Wall extends BaseModel{
 
     }
 
-    render(time){
+    render(time, uniforms){
         if (this.shader){
+            //uniforms.lightPos.x = -uniforms.lightPos.x;
+            //console.log(uniforms.lightPos)
             this.wall_mat.uniforms['u_time'].value = time*2;
+            this.wall_mat.uniforms["u_LightPos"].value = uniforms.lightPos;
+            this.wall_mat.uniforms["u_LightIntensity"].value = uniforms.lightIntensity;
+            this.wall_mat.uniforms["u_CameraPos"].value = uniforms.cameraPos;
         }
     }
 
@@ -192,7 +218,7 @@ export class BridgeUnit extends BaseModel{
         
         //console.log(this.w, this.l)
 
-        this.objects.push(new Wall(this.w, 1, this.l, {color:0xe3e0cd}, [this.x, 0, this.z]));
+        this.objects.push(new Wall(this.w, 1, this.l, {color:0xe3e0cd}, [this.x, 0, this.z],true));
         
         this.objects.at(-1).receiveShadow = true;
         if (this.wallPos){ // top left bot right

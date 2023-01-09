@@ -35,7 +35,7 @@ export class Field extends BaseModel{
         super();
 
         const planeSize = 60;
-        const planeSegs = 180;
+        const planeSegs = 120;
         
         this.planeSize = planeSize;
         this.planeSegs = planeSegs;
@@ -46,7 +46,7 @@ export class Field extends BaseModel{
 
         let planeMat = new THREE.MeshStandardMaterial( {color: 0xFF0000} );
         planeMat.shininess = 1,0;
-        planeMat.roughness = 0.5;
+        planeMat.roughness = -0.5;
         
         // this.groundMirror = new Reflector( this.planeGeo, {
         //     clipBias: 0.003,

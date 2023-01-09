@@ -10,7 +10,7 @@ const SkyBoxVertexShader = `
 `;
 
 const SkyBoxFragmentShader = `
-  // from https://www.shadertoy.com/view/MsS3Wc
+  // hsvr2rgb from https://www.shadertoy.com/view/MsS3Wc
 
   #define PI 3.1415926535
 
@@ -72,7 +72,6 @@ const SkyBoxFragmentShader = `
     
     // this kinda works, but i dunno what is going on
     //col += 0.1/l;
-
 
     //col.y = clamp(col.y, 0.9, 1.0 );
       
