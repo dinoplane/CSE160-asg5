@@ -7,6 +7,6 @@
   },
   
   "scripts": {
-    "deploy": "gh-pages -d"
+    "deploy": "gh-pages -d dist"
   }
 }
