@@ -218,11 +218,30 @@ export class BridgeUnit extends BaseModel{
         
         //console.log(this.w, this.l)
 
-        this.objects.push(new Wall(this.w, 1, this.l, {color:0xe3e0cd}, [this.x, 0, this.z],true));
+
         
-        this.objects.at(-1).receiveShadow = true;
+        //this.objects.at(-1).receiveShadow = true;
         if (this.wallPos){ // top left bot right
             //console.log(this.wallPos);
+            let numTiles = 8;
+            let posDenom = numTiles*2;
+            if (this.wallPos[0] >= 0 || this.wallPos[2] >= 0){
+                let bridgeStartZ = this.z - this.l/2;
+                for (let i = 0; i < numTiles; i++){
+                    this.objects.push(new Wall(this.w*0.97, 1, this.l*0.75/numTiles, {color:0xe3e0cd}, [this.x, 0, bridgeStartZ + (i*2 + 1)*this.l/posDenom],true));
+                }
+            } else {
+                let bridgeStartX = this.x - this.w/2;
+                for (let i = 0; i < numTiles; i++){
+                    this.objects.push(new Wall(this.w*0.75/numTiles, 1, this.l*0.97, {color:0xe3e0cd}, [bridgeStartX + (i*2 + 1)*this.w/posDenom, 0, this.z],true));
+                }
+            }
+
+            //this.objects.push(new Wall(this.w/4, 1, this.l, {color:0xe3e0cd}, [this.x, 0, this.z],true));
+            // this.objects.push(new Wall(this.w/4, 1, this.l, {color:0xe3e0cd}, [this.x, 0, this.z],true));
+            // this.objects.push(new Wall(this.w/4, 1, this.l, {color:0xe3e0cd}, [this.x, 0, this.z],true));
+            // this.objects.push(new Wall(this.w/4, 1, this.l, {color:0xe3e0cd}, [this.x, 0, this.z],true));
+
             let SPACING = this.w/2 -0.25;
 
             let texture = loader.load('./resources/images/fish.png')
@@ -235,43 +254,43 @@ export class BridgeUnit extends BaseModel{
 
             let h_ = 0.1;
             // 4 sides
-            if (this.wallPos[0] == -1)
-                this.objects.push(new Wall(this.w, h_, 0.5, {map: texture}, [this.x, h_/2.0+0.5, this.z-SPACING]));
+            // if (this.wallPos[0] == -1)
+            //     this.objects.push(new Wall(this.w, h_, 0.5, {map: texture}, [this.x, h_/2.0+0.5, this.z-SPACING]));
 
-            if (this.wallPos[1] == -1)
-                this.objects.push(new Wall(0.5, h_, this.l, {map: texture}, [this.x-SPACING, h_/2.0+0.5, this.z]));
+            // if (this.wallPos[1] == -1)
+            //     this.objects.push(new Wall(0.5, h_, this.l, {map: texture}, [this.x-SPACING, h_/2.0+0.5, this.z]));
         
-            if (this.wallPos[2] == -1)
-                this.objects.push(new Wall(this.w, h_, 0.5, {map: texture}, [this.x, h_/2.0+0.5, this.z+SPACING]));
+            // if (this.wallPos[2] == -1)
+            //     this.objects.push(new Wall(this.w, h_, 0.5, {map: texture}, [this.x, h_/2.0+0.5, this.z+SPACING]));
         
-            if (this.wallPos[3] == -1)
-                this.objects.push(new Wall(0.5, h_, this.l, {map: texture}, [this.x+SPACING, h_/2.0+0.5, this.z]));
+            // if (this.wallPos[3] == -1)
+            //     this.objects.push(new Wall(0.5, h_, this.l, {map: texture}, [this.x+SPACING, h_/2.0+0.5, this.z]));
 
-            // 4 corners
-            if (this.wallPos[0] == this.wallPos[1])
-                this.objects.push(new TorusStack(this.x-SPACING, this.z-SPACING));
+            // // 4 corners
+            // if (this.wallPos[0] == this.wallPos[1])
+            //     this.objects.push(new TorusStack(this.x-SPACING, this.z-SPACING));
 
-            if (this.wallPos[1] == this.wallPos[2])
-                this.objects.push(new TorusStack(this.x-SPACING, this.z+SPACING));
+            // if (this.wallPos[1] == this.wallPos[2])
+            //     this.objects.push(new TorusStack(this.x-SPACING, this.z+SPACING));
 
-            if (this.wallPos[2] == this.wallPos[3])
-                this.objects.push(new TorusStack(this.x+SPACING, this.z+SPACING));
+            // if (this.wallPos[2] == this.wallPos[3])
+            //     this.objects.push(new TorusStack(this.x+SPACING, this.z+SPACING));
 
-            if (this.wallPos[3] == this.wallPos[0])
-                this.objects.push(new TorusStack(this.x+SPACING, this.z-SPACING));
+            // if (this.wallPos[3] == this.wallPos[0])
+            //     this.objects.push(new TorusStack(this.x+SPACING, this.z-SPACING));
 
 
-            if (this.wallPos[0] >= 0 &&  this.wallPos[1] >= 0)
-                this.objects.push(new TorusStack(this.x-SPACING, this.z-SPACING));
+            // if (this.wallPos[0] >= 0 &&  this.wallPos[1] >= 0)
+            //     this.objects.push(new TorusStack(this.x-SPACING, this.z-SPACING));
 
-            if (this.wallPos[1] >= 0 &&  this.wallPos[2] >=0)
-                this.objects.push(new TorusStack(this.x-SPACING, this.z+SPACING));
+            // if (this.wallPos[1] >= 0 &&  this.wallPos[2] >=0)
+            //     this.objects.push(new TorusStack(this.x-SPACING, this.z+SPACING));
 
-            if (this.wallPos[2] >= 0 &&  this.wallPos[3] >= 0)
-            this.objects.push(new TorusStack(this.x+SPACING, this.z+SPACING));
+            // if (this.wallPos[2] >= 0 &&  this.wallPos[3] >= 0)
+            // this.objects.push(new TorusStack(this.x+SPACING, this.z+SPACING));
 
-            if (this.wallPos[3] >= 0 &&  this.wallPos[0] >= 0)
-                this.objects.push(new TorusStack(this.x+SPACING, this.z-SPACING));
+            // if (this.wallPos[3] >= 0 &&  this.wallPos[0] >= 0)
+            //     this.objects.push(new TorusStack(this.x+SPACING, this.z-SPACING));
 
 
         }

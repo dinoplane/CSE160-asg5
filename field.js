@@ -30,6 +30,12 @@ class Wave{
     }
 }
 
+class RiceSprout{
+
+
+}
+
+
 export class Field extends BaseModel{
     constructor(renderer, camera, scene){
         super();
@@ -80,7 +86,7 @@ export class Field extends BaseModel{
         });
         //this.objects.at(-1).receiveShadow = true;
         this.objects.at(-1).rotation.x = Math.PI * -0.5;
-        this.objects.at(-1).position.y = 0.4;
+        this.objects.at(-1).position.y = 0.3;
         this.objects.at(-1).color = 0xff0000;
         
         
@@ -102,6 +108,11 @@ export class Field extends BaseModel{
         this.waves.push(new Wave(new THREE.Vector2(1, 0.6), 0.1, 0.25*Math.PI));
         this.waves.push(new Wave(new THREE.Vector2(0, -1.3), 0.1, 0.15*Math.PI));
 
+
+
+        // Add Rice
+        
+        
 
     }
 
@@ -188,6 +199,9 @@ export class Field extends BaseModel{
     render(time, renderer, scene){
         this.updateWave(time);
         this.material.update();
+
+        // this.riceMaterial.uniforms.time.value = time;
+        // this.riceMaterial.uniformsNeedUpdate = true;
         // renderer.setRenderTarget(this.renderTarget);
         // renderer.render(scene, this.rtCamera);
         // renderer.setRenderTarget(null);

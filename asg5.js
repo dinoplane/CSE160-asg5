@@ -136,10 +136,10 @@ function main() {
 
 
     // Fog
-    const near = 1;
-    const far = 3;
-    const fogColor = 'lightblue';
-    scene.fog = new THREE.Fog(fogColor, near, far);
+    // const near = 1;
+    // const far = 3;
+    // const fogColor = 'lightblue';
+    // scene.fog = new THREE.Fog(fogColor, near, far);
     
 
     {
@@ -358,9 +358,9 @@ function main() {
         maze.render(time, {lightPos: light.position, lightIntensity: light.intensity, cameraPos: camera.position});
         field.render(time, renderer, scene);
         skyColor = hsv2rgb(mix(dayColor, nightColor, (Math.sin(time+Math.PI)+1.0)/2.0));
-        console.log(skyColor)
+        
         scene.background = new THREE.Color(skyColor);
-        scene.fog.color = new THREE.Color(skyColor.x, skyColor.y, skyColor.z);
+        //scene.fog.color = new THREE.Color(skyColor.x, skyColor.y, skyColor.z);
         fPcontrols.update(time);
         light.position.set(10*Math.cos(time), 10, 0);
         

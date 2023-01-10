@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { BridgeUnit } from './bridge.js';
 import { BaseModel } from './baseModel.js';
 
+import {FieldVertexShader, FieldFragmentShader} from './resources/shaders/Field.js';
+
 export class Maze {
     constructor(width=7, height=7, ctr_, tot_w, tot_h){
         this.w = width;
@@ -160,28 +162,104 @@ export class Maze {
     }
 
 
+
+    initRice(){
+        this.riceMaterial = new THREE.ShaderMaterial({
+            vertexShader: FieldVertexShader,
+            fragmentShader: FieldFragmentShader,
+            uniforms: {
+                time: {
+                    type: 'f',
+                    value: 0.0
+                }
+            },
+            side: THREE.DoubleSide
+        });
+        
+
+        let riceGeo = new THREE.PlaneGeometry(0.01, 4, 1, 8);
+        
+        // num grass
+        this.numGrassW = 1;
+        this.numGrassL = 1;
+        this.totGrass = this.numGrassW * this.numGrassL;
+        
+        this.numBundle = 1;
+        const instanceNumber = this.w*this.h * 8 * this.totGrass * this.numBundle ;
+        this.riceField = new THREE.InstancedMesh(riceGeo, this.riceMaterial, instanceNumber);
+        this.riceField.position.y = 0.3;
+        //this.rice = new THREE.Object3D();
+        this.riceCount = 0;
+    }
+
+    addRice(x, y){
+        let startX = x ;
+        let startY = y ;
+
+        console.log(x, y)
+        const rice = new THREE.Object3D();
+        
+        for(let i = 0; i < this.numGrassW; i++){
+            for (let j = 0; j < this.numGrassL; j++){
+                for (let n=0; n<this.numBundle; n++){
+                    rice.position.set(
+                        startX + i*this.tWidth/this.totGrass + 0*( Math.random() - 0.5 )*0.05,
+                      0,
+                      startY + j*this.tHeight/this.totGrass + 0*( Math.random() - 0.5 )*0.05,
+                    );
+
+                    console.log(startX + x/this.totGrass);
+                    
+                    rice.scale.setScalar( 0.5 + Math.random() * 0.5 );
+                    
+                    rice.rotation.y = Math.random() * Math.PI;
+                    
+                    rice.updateMatrix();
+
+                    this.riceField.setMatrixAt( this.riceCount, rice.matrix );
+                    this.riceCount += 1;                  
+                }
+        
+            }
+        }
+    }
+
     initParts(){
+        this.initRice();
+
         for (let i = 0; i < this.w*this.h; i++){
             let gridCoord = this.getGridCoord(i);
             let localCoord = this.getGridToLocal(gridCoord.x, gridCoord.y);
             //console.log(localCoord)
-            let tWidth = this.totalWidth/this.gw *0.95;
-            let tHeight = this.totalHeight/this.gh *0.95;
+            let tWidth = this.totalWidth/this.gw;
+            let tHeight = this.totalHeight/this.gh;
 
             //console.log(tWidth)
 
             this.objects.push(new BridgeUnit(localCoord.x, localCoord.y, this.adjacency[i], tWidth, tHeight));
 
+            // 4 corners always have rice
+            // check bot and right
+
+            
+            localCoord = this.getGridToLocal(gridCoord.x+1, gridCoord.y);
             if (this.grid[gridCoord.y][gridCoord.x+1] == 0){ // we go right
-                localCoord = this.getGridToLocal(gridCoord.x+1, gridCoord.y);
                 this.objects.push(new BridgeUnit(localCoord.x, localCoord.y, [-1, 0, -1, 0], tWidth, tHeight));
+            } else {
+                this.addRice(localCoord.x, localCoord.y);
             }
 
+            localCoord = this.getGridToLocal(gridCoord.x, gridCoord.y+1);
             if (this.grid[gridCoord.y+1][gridCoord.x] == 0){ // we go bot
-                localCoord = this.getGridToLocal(gridCoord.x, gridCoord.y+1);
                 this.objects.push(new BridgeUnit(localCoord.x, localCoord.y, [0, -1, 0, -1], tWidth, tHeight));
+            } else {
+                this.addRice(localCoord.x, localCoord.y);
             }
         }
+        this.riceField.instanceNumber = this.riceCount;
+        console.log(this.riceCount)
+        
+        this.objects.push(this.riceField);
     }
 
     onCollide(obj){ // only used between maze and player
@@ -246,9 +324,12 @@ export class Maze {
     }
 
     addToScene(scene){
-        for (let i = 0; i < this.objects.length; i++){
+        for (let obj of this.objects){
             //console.log(this.objects[i]);
-            this.objects[i].addToScene(scene);
+            if (obj instanceof BaseModel)
+                obj.addToScene(scene);
+            else
+                scene.add(obj);
         }
     }
 }

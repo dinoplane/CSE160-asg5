@@ -311,7 +311,7 @@ void main(void){
     float dist = distance(vec2(0.5, 0.5),
                         abs(slice.xy)) + 0.1*fbm(vec4(v_Position, 1.0));
 
-    float rings = 1.0 - abs( fract( dist*100.0) * 2.0 - 1.0 ); 
+    float rings = 1.0 - abs( fract( dist*20.0) * 2.0 - 1.0 ); 
     rings = smoothstep( 0.2, 0.3, rings ); 
 
 
